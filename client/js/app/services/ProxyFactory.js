@@ -1,6 +1,7 @@
 class ProxyFactory {
 
     static create(objeto, props, acao) {
+
         return new Proxy(objeto, {
 
             get(target, prop, receiver) {
@@ -11,9 +12,9 @@ class ProxyFactory {
 
                         console.log(`método '${prop}' interceptado`);
 
-                        Reflect.apply(target[prop], target, arguments);
-
-                        return acao(target);
+                        let retorno = Reflect.apply(target[prop], target, arguments);
+                        acao(target);
+                        return retorno;
                     }
                 }
 
@@ -21,12 +22,10 @@ class ProxyFactory {
             },
 
             set(target, prop, value, receiver) {
-                if (props.includes(prop)) {
-                    target[prop] = value;
-                    acao(target);
-                }
-                return Reflect.set(target, prop, value, receiver);
 
+                let retorno = Reflect.set(target, prop, value, receiver);
+                if (props.includes(prop)) acao(target);    // só executa acao(target) se for uma propriedade monitorada
+                return retorno;
             }
         });
     }
